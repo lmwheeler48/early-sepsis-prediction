@@ -84,41 +84,38 @@ It models how information fades over time using learnable **decay mechanisms** t
 
 ### 🔹 Mathematical Formulation
 
-Let \( x_t \) denote the observed features at time *t*, \( m_t \) be the mask vector (1 if observed, 0 if missing),  
-and \( \Delta_t \) the time since each feature was last observed.
+Let **xₜ** denote the observed features at time *t*, **mₜ** be the mask vector (1 if observed, 0 if missing),  
+and **Δₜ** the time since each feature was last observed.
 
-1. **Decay terms:**
-
-\[
+#### 1. Decay Terms
+$$
 \gamma_x = e^{-\max(0, W_x \Delta_t + b_x)}, \quad 
 \gamma_h = e^{-\max(0, W_h \Delta_t + b_h)}
-\]
+$$
 
 These learnable decays control how fast information fades for inputs and hidden states.
 
-2. **Imputation for missing inputs:**
-
-\[
+#### 2. Imputation for Missing Inputs
+$$
 x_t' = m_t \odot x_t + (1 - m_t) \odot (\gamma_x \odot x_{t-1}' + (1 - \gamma_x) \odot \bar{x})
-\]
+$$
 
-Here, \(\bar{x}\) is the empirical mean for each feature, and \(\odot\) denotes elementwise multiplication.
+Here, **x̄** is the empirical mean for each feature, and **⊙** denotes elementwise multiplication.
 
-3. **GRU-D hidden state update:**
-
-\[
+#### 3. GRU-D Hidden State Update
+$$
 \begin{aligned}
 z_t &= \sigma(W_z x_t' + U_z (\gamma_h \odot h_{t-1}) + b_z), \\
 r_t &= \sigma(W_r x_t' + U_r (\gamma_h \odot h_{t-1}) + b_r), \\
 \tilde{h}_t &= \tanh(W_h x_t' + U_h (r_t \odot (\gamma_h \odot h_{t-1})) + b_h), \\
 h_t &= (1 - z_t) \odot (\gamma_h \odot h_{t-1}) + z_t \odot \tilde{h}_t
 \end{aligned}
-\]
+$$
 
-- \( z_t \): update gate  
-- \( r_t \): reset gate  
-- \( \gamma_h \): hidden state decay factor  
-- \( h_t \): hidden state at time *t*
+- **zₜ**: update gate  
+- **rₜ**: reset gate  
+- **γₕ**: hidden state decay factor  
+- **hₜ**: hidden state at time *t*
 
 This formulation allows the network to learn from both **observed values** and **missingness patterns**, adapting the decay of information over time.
 
@@ -150,8 +147,10 @@ This formulation allows the network to learn from both **observed values** and *
 
 ### 🩺 Summary
 
-The GRU-D model effectively captures **temporal dependencies**, **missingness patterns**, and **time-gap dynamics**, making it well-suited for **ICU sepsis prediction**.  
+The GRU-D model effectively captures **temporal dependencies**, **missingness patterns**, and **time-gap dynamics**,  
+making it well-suited for **ICU sepsis prediction**.  
 Its strong AUROC and AUPRC values demonstrate high discriminative performance even under **severe class imbalance** (7% sepsis rate).
+
 
 
 <u>Temporal Convolutional Networks</u> (TCNs), by contract, use a series of one-dimensional causal convolution layers to ensure that each prediction at time <i>t</i> depends only on current and past inputs, preserving temporal order. These convolutions are organized in residual blocks with dilated convolutions, ReLU activations, and dropout layers to capture both short- and long-term temporal dependencies efficiently. Padding is applied to maintain consistent sequence lengths across layers. The extracted temporal features are then aggregated using global average pooling, producing a fixed-size representation for the final binary classification layer. This architecture combines the interpretability of convolutional models with strong performance on sequential medical data.
