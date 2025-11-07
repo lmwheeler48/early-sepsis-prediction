@@ -45,7 +45,7 @@ The `EDA_Data_Cleaning.ipynb` notebook explores the clinical time-series data to
 
 ---
 
-### 2. Padding and Masking (`[EDA_Data_Cleaning.ipynb](EDA_Data_Cleaning/EDA_Data_Cleaning.ipynb)`)
+### 2. Padding and Masking (`EDA_Data_Cleaning.ipynb`)
 - Loaded the cleaned dataset and identified all numeric clinical features.  
 - Computed the target sequence length using the **95th percentile** of patient record lengths.  
 - For each patient, truncated or padded the sequence (keeping the tail) with a padding value of **−1**, added a **Mask** column to mark valid time steps, and built fixed-length sequences for deep learning models.
