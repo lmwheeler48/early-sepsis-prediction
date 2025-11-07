@@ -35,18 +35,18 @@ The `EDA_Data_Cleaning.ipynb` notebook explores the clinical time-series data to
 
 ## Dataset Preprocessing
 
-### 1. Initial Cleaning (`Initial_Data_Processing.ipynb`)
+**1. Initial Cleaning (`Initial_Data_Processing.ipynb`)**
 - Loaded the raw ICU dataset and standardized key columns: **patient ID**, **time**, and **Sepsis**.  
 - Converted all clinical and time variables to numeric types, handling missing or invalid entries.  
 - Sorted records chronologically by **ID** and **time** to ensure temporal consistency.  
 - Saved the cleaned dataset in `Output_dir/cleaning_pipeline/` for downstream processing.
 
-### 2. Padding and Masking (`EDA_Data_Cleaning.ipynb`)
+**2. Padding and Masking (`EDA_Data_Cleaning.ipynb`)**
 - Loaded the cleaned dataset and identified all numeric clinical features.  
 - Computed the target sequence length using the **95th percentile** of patient record lengths.  
 - For each patient, truncated or padded the sequence (keeping the tail) with a padding value of **−1**, added a **Mask** column to mark valid time steps, and built fixed-length sequences for deep learning models.
 
-### 3. Exact Stratified Splits (`EDA_Data_Cleaning.ipynb`)
+**3. Exact Stratified Splits (`EDA_Data_Cleaning.ipynb`)**
 - Derived patient-level labels using the maximum **Sepsis** value per patient.  
 - Performed an **exact 60/20/20 stratified split** to create **training**, **validation**, and **testing** sets while maintaining septic/non-septic balance.  
 - Ensured no patient overlap across splits.  
@@ -70,6 +70,8 @@ At this time, it is clear that this baseline model is insufficient for clinical 
 Three deep learning architectures were engineered and their performances compared: <b>GRU-D, TCN</b>, and <b>TRT</b>. 
 
 ### Gated Recurrent Unit with Decay (GRU-D)
+
+A GRU-D is a deep-learning model tailored for irregular time-series data with lots of missing values. It learns both temporal trends and missingness patterns, enabling detection of rare events due to class imbalance. 
 
 | **Component** | **Mathematical / Functional Description** | **Purpose in Model** |
 |:---------------|:------------------------------------------|:---------------------|
@@ -100,14 +102,6 @@ Performance Metrics
 | **AUPRC** | **0.51** | Good precision-recall balance under class imbalance |
 | **Balanced Threshold (0.24)** | Precision = 0.53 · Recall = 0.41 | Stable sensitivity-specificity trade-off |
 | **High-Recall Mode (≥ 0.90)** | Recall = 0.88 | Detects nearly all high-risk patients for early alerts |
-
----
-
-### 🩺 At a Glance
-**GRU-D** models **temporal decay and missingness** in ICU data, learns from irregular samples,  
-and achieves **robust sepsis prediction performance (AUROC 0.82, AUPRC 0.51)** despite severe **class imbalance (7%)**.
-
-
 
 ### Temporal Convolutional Network (TCN)
 TCNs, by contrast, use a series of one-dimensional causal convolution layers to ensure that each prediction at time <i>t</i> depends only on current and past inputs, preserving temporal order. These convolutions are organized in residual blocks with dilated convolutions, ReLU activations, and dropout layers to capture both short- and long-term temporal dependencies efficiently. Padding is applied to maintain consistent sequence lengths across layers. The extracted temporal features are then aggregated using global average pooling, producing a fixed-size representation for the final binary classification layer. This architecture combines the interpretability of convolutional models with strong performance on sequential medical data.
