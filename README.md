@@ -36,7 +36,7 @@ SAYANTAN ADD HERE
 
 ## 📘 Data Preparation Overview
 
-### 1. Initial Cleaning (`Sepsis_data_cleaning.ipynb`)
+### 1. Initial Cleaning (`Initial_Data_Processing.ipynb`)
 - Loaded the raw ICU dataset and standardized key columns: **patient ID**, **time**, and **Sepsis**.  
 - Converted all clinical and time variables to numeric types, handling missing or invalid entries.  
 - Sorted records chronologically by **ID** and **time** to ensure temporal consistency.  
@@ -44,14 +44,14 @@ SAYANTAN ADD HERE
 
 ---
 
-### 2. Padding and Masking (`sepsis_eda_1.ipynb`)
+### 2. Padding and Masking (`EDA_Data_Cleaning.ipynb`)
 - Loaded the cleaned dataset and identified all numeric clinical features.  
 - Computed the target sequence length using the **95th percentile** of patient record lengths.  
 - For each patient, truncated or padded the sequence (keeping the tail) with a padding value of **−1**, added a **Mask** column to mark valid time steps, and built fixed-length sequences for deep learning models.
 
 ---
 
-### 3. Exact Stratified Splits (`sepsis_eda_1.ipynb`)
+### 3. Exact Stratified Splits (`EDA_Data_Cleaning.ipynb`)
 - Derived patient-level labels using the maximum **Sepsis** value per patient.  
 - Performed an **exact 60/20/20 stratified split** to create **training**, **validation**, and **testing** sets while maintaining septic/non-septic balance.  
 - Ensured no patient overlap across splits.  
