@@ -30,7 +30,8 @@ The dataset density varied by feature, as seen in the figure below. Some feature
 
 Since, this dataset contains a lot of parameters, we conducted a brief literature review to see what factors are key to an ICU sepsis diagnosis. Singer et al. ([2016](https://jamanetwork.com/journals/jama/fullarticle/2492881)) defines sepsis as life-threatening organ dysfunction and septic shock as persistent hypotension (MAP≥65 mmHg) with lactate>2 mmol/L despite fluids. They also introduced qSOFA (fast respiratory rate, altered mental status, low BP) as a quick bedside risk tool. Ryoo & Kim ([2018](https://jeccm.amegroups.org/article/view/4083/html)) find that elevated lactate signals severe cellular stress. Temperature management ([Doman et al., 2023](https://www.frontiersin.org/journals/medicine/articles/10.3389/fmed.2023.1292468/full)) aids screening, but aggressive control hasn’t improved outcome. This means that key parameters to monitor include (but are not limited to) <b>respiration rate, temperature, heart rate, lactate</b>, and <b>mean arterial pressure</b>.
 
-SAYANTAN ADD HERE
+The `EDA_Data_Cleaning.ipynb` notebook explores the clinical time-series data to understand feature behavior and patterns associated with sepsis onset. It examines patient demographics, vital signs, and laboratory trends using statistical summaries and visualizations. The analysis investigates data imbalance between septic and non-septic patients, correlation among variables, and temporal dynamics of critical features like heart rate, blood pressure, lactate levels, and oxygen saturation. Distributions and variability across time and patient outcomes are visualized through histograms, heatmaps, and time-series plots, providing key insights into physiological differences that inform model development and feature importance interpretation.
+
 
 ## Dataset Preprocessing
 
