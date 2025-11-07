@@ -34,7 +34,36 @@ SAYANTAN ADD HERE
 
 ## Dataset Preprocessing
 
-SAYANTAN ADD HERE
+## 📘 Data Preparation Overview
+
+### 1. Initial Cleaning (`Sepsis_data_cleaning.ipynb`)
+- Loaded the raw ICU dataset and standardized key columns: **patient ID**, **time**, and **Sepsis**.  
+- Converted all clinical and time variables to numeric types, handling missing or invalid entries.  
+- Sorted records chronologically by **ID** and **time** to ensure temporal consistency.  
+- Saved the cleaned dataset in `Output_dir/cleaning_pipeline/` for downstream processing.
+
+---
+
+### 2. Padding and Masking (`sepsis_eda_1.ipynb`)
+- Loaded the cleaned dataset and identified all numeric clinical features.  
+- Computed the target sequence length using the **95th percentile** of patient record lengths.  
+- For each patient, truncated or padded the sequence (keeping the tail) with a padding value of **−1**, added a **Mask** column to mark valid time steps, and built fixed-length sequences for deep learning models.
+
+---
+
+### 3. Exact Stratified Splits (`sepsis_eda_1.ipynb`)
+- Derived patient-level labels using the maximum **Sepsis** value per patient.  
+- Performed an **exact 60/20/20 stratified split** to create **training**, **validation**, and **testing** sets while maintaining septic/non-septic balance.  
+- Ensured no patient overlap across splits.  
+- Saved patient lists and split-specific Parquet datasets in `Output_dir/padded_masked/`.
+
+---
+
+✅ **Output Summary**
+- Cleaned dataset → `Output_dir/cleaning_pipeline/all_patients_cleaned.csv`  
+- Padded + masked dataset → `Output_dir/padded_masked/sepsis_dataset_padded_masked.parquet`  
+- Split datasets → `Output_dir/padded_masked/{train,val,test}_patients.csv` and Parquet files
+
 
 ## Baseline Models
 
