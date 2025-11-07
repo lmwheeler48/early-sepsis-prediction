@@ -77,7 +77,82 @@ At this time, it is clear that this baseline model is insufficient for clinical 
 
 Three deep learning architectures were engineered and their performances compared: <b>GRU-D, TCN</b>, and <b>TRT</b>. 
 
-A Gated Recurrent Unit with Decay (GRU-D): SAYANTAN ADD HERE
+## 🧠 GRU-D: Gated Recurrent Unit with Decay
+
+The **GRU-D (Gated Recurrent Unit with Decay)** is a variant of the standard GRU designed to handle **irregularly sampled, missing clinical time-series data**.  
+It models how information fades over time using learnable **decay mechanisms** that depend on the time gaps between observations.
+
+### 🔹 Mathematical Formulation
+
+Let \( x_t \) denote the observed features at time *t*, \( m_t \) be the mask vector (1 if observed, 0 if missing),  
+and \( \Delta_t \) the time since each feature was last observed.
+
+1. **Decay terms:**
+
+\[
+\gamma_x = e^{-\max(0, W_x \Delta_t + b_x)}, \quad 
+\gamma_h = e^{-\max(0, W_h \Delta_t + b_h)}
+\]
+
+These learnable decays control how fast information fades for inputs and hidden states.
+
+2. **Imputation for missing inputs:**
+
+\[
+x_t' = m_t \odot x_t + (1 - m_t) \odot (\gamma_x \odot x_{t-1}' + (1 - \gamma_x) \odot \bar{x})
+\]
+
+Here, \(\bar{x}\) is the empirical mean for each feature, and \(\odot\) denotes elementwise multiplication.
+
+3. **GRU-D hidden state update:**
+
+\[
+\begin{aligned}
+z_t &= \sigma(W_z x_t' + U_z (\gamma_h \odot h_{t-1}) + b_z), \\
+r_t &= \sigma(W_r x_t' + U_r (\gamma_h \odot h_{t-1}) + b_r), \\
+\tilde{h}_t &= \tanh(W_h x_t' + U_h (r_t \odot (\gamma_h \odot h_{t-1})) + b_h), \\
+h_t &= (1 - z_t) \odot (\gamma_h \odot h_{t-1}) + z_t \odot \tilde{h}_t
+\end{aligned}
+\]
+
+- \( z_t \): update gate  
+- \( r_t \): reset gate  
+- \( \gamma_h \): hidden state decay factor  
+- \( h_t \): hidden state at time *t*
+
+This formulation allows the network to learn from both **observed values** and **missingness patterns**, adapting the decay of information over time.
+
+---
+
+## ⚙️ Training Configuration
+
+- **Loss Function:** Focal Loss (α = 0.75, γ = 2.0)  
+- **Batch Size:** 16  
+- **Epochs:** 100  
+- **Learning Rate:** 1e-3  
+- **Hidden Units:** 128  
+- **Dropout:** 0.3  
+- **Optimizer:** Adam  
+
+---
+
+## 📊 Results Summary
+
+| Metric | Description | Value | Interpretation |
+|:--------|:-------------|:------|:----------------|
+| **AUROC** | Record-level discrimination | **0.91** | Excellent ability to separate septic vs. non-septic records |
+| **Patient-level AUROC** | Aggregated per patient | **0.82** | Strong generalization across patients |
+| **AUPRC** | Precision–Recall area | **0.51** | Solid predictive power under class imbalance |
+| **Balanced Threshold (0.24)** | Precision = 0.53, Recall = 0.41 | — | Stable sensitivity–specificity trade-off |
+| **High-Recall Mode (≥0.90)** | Recall = 0.88 | — | Effectively detects nearly all high-risk sepsis patients |
+
+---
+
+### 🩺 Summary
+
+The GRU-D model effectively captures **temporal dependencies**, **missingness patterns**, and **time-gap dynamics**, making it well-suited for **ICU sepsis prediction**.  
+Its strong AUROC and AUPRC values demonstrate high discriminative performance even under **severe class imbalance** (7% sepsis rate).
+
 
 <u>Temporal Convolutional Networks</u> (TCNs), by contract, use a series of one-dimensional causal convolution layers to ensure that each prediction at time <i>t</i> depends only on current and past inputs, preserving temporal order. These convolutions are organized in residual blocks with dilated convolutions, ReLU activations, and dropout layers to capture both short- and long-term temporal dependencies efficiently. Padding is applied to maintain consistent sequence lengths across layers. The extracted temporal features are then aggregated using global average pooling, producing a fixed-size representation for the final binary classification layer. This architecture combines the interpretability of convolutional models with strong performance on sequential medical data.
 
