@@ -77,86 +77,54 @@ At this time, it is clear that this baseline model is insufficient for clinical 
 
 Three deep learning architectures were engineered and their performances compared: <b>GRU-D, TCN</b>, and <b>TRT</b>. 
 
-## 🧠 GRU-D: Gated Recurrent Unit with Decay
+## 🧠 GRU-D Summary (Gated Recurrent Unit with Decay)
 
-The **GRU-D (Gated Recurrent Unit with Decay)** is a variant of the standard GRU designed to handle **irregularly sampled, missing clinical time-series data**.  
-It models how information fades over time using learnable **decay mechanisms** that depend on the time gaps between observations.
-
-### 🔹 Mathematical Formulation
-
-Let **xₜ** denote the observed features at time *t*, **mₜ** be the mask vector (1 if observed, 0 if missing),  
-and **Δₜ** the time since each feature was last observed.
-
-#### 1. Decay Terms
-$$
-\gamma_x = e^{-\max(0, W_x \Delta_t + b_x)}, \quad 
-\gamma_h = e^{-\max(0, W_h \Delta_t + b_h)}
-$$
-
-These learnable decays control how fast information fades for inputs and hidden states.
-
-#### 2. Imputation for Missing Inputs
-$$
-x_t' = m_t \odot x_t + (1 - m_t) \odot (\gamma_x \odot x_{t-1}' + (1 - \gamma_x) \odot \bar{x})
-$$
-
-Here, **x̄** is the empirical mean for each feature, and **⊙** denotes elementwise multiplication.
-
-#### 3. GRU-D Hidden State Update
-$$
-\begin{aligned}
-z_t &= \sigma(W_z x_t' + U_z (\gamma_h \odot h_{t-1}) + b_z), \\
-r_t &= \sigma(W_r x_t' + U_r (\gamma_h \odot h_{t-1}) + b_r), \\
-\tilde{h}_t &= \tanh(W_h x_t' + U_h (r_t \odot (\gamma_h \odot h_{t-1})) + b_h), \\
-h_t &= (1 - z_t) \odot (\gamma_h \odot h_{t-1}) + z_t \odot \tilde{h}_t
-\end{aligned}
-$$
-
-- **zₜ**: update gate  
-- **rₜ**: reset gate  
-- **γₕ**: hidden state decay factor  
-- **hₜ**: hidden state at time *t*
-
-This formulation allows the network to learn from both **observed values** and **missingness patterns**, adapting the decay of information over time.
+| **Component** | **Mathematical / Functional Description** | **Purpose in Model** |
+|:---------------|:------------------------------------------|:---------------------|
+| **Input Decay (γₓ)** | $$\gamma_x = e^{-\max(0, W_x \Delta_t + b_x)}$$ | Learns how quickly each input feature's influence fades over time gaps |
+| **Hidden Decay (γₕ)** | $$\gamma_h = e^{-\max(0, W_h \Delta_t + b_h)}$$ | Controls how much past hidden states are retained or forgotten |
+| **Imputation Rule** | $$x_t' = m_t ⊙ x_t + (1 - m_t) ⊙ (\gamma_x ⊙ x_{t-1}' + (1 - \gamma_x) ⊙ \bar{x})$$ | Fills missing data using past values and feature means |
+| **Hidden Update (GRU-D)** | $$h_t = (1 - z_t) ⊙ (\gamma_h ⊙ h_{t-1}) + z_t ⊙ \tilde{h}_t$$ | Combines new information with decayed memory for temporal prediction |
+| **Loss Function** | Focal Loss (α = 0.75, γ = 2.0) | Handles class imbalance by emphasizing rare septic cases |
 
 ---
 
-## ⚙️ Training Configuration
+## ⚙️ Training & Evaluation Summary
 
-- **Loss Function:** Focal Loss (α = 0.75, γ = 2.0)  
-- **Batch Size:** 16  
-- **Epochs:** 100  
-- **Learning Rate:** 1e-3  
-- **Hidden Units:** 128  
-- **Dropout:** 0.3  
-- **Optimizer:** Adam  
-
----
-
-## 📊 Results Summary
-
-| Metric | Description | Value | Interpretation |
-|:--------|:-------------|:------|:----------------|
-| **AUROC** | Record-level discrimination | **0.91** | Excellent ability to separate septic vs. non-septic records |
-| **Patient-level AUROC** | Aggregated per patient | **0.82** | Strong generalization across patients |
-| **AUPRC** | Precision–Recall area | **0.51** | Solid predictive power under class imbalance |
-| **Balanced Threshold (0.24)** | Precision = 0.53, Recall = 0.41 | — | Stable sensitivity–specificity trade-off |
-| **High-Recall Mode (≥0.90)** | Recall = 0.88 | — | Effectively detects nearly all high-risk sepsis patients |
+| **Parameter** | **Value / Setting** |
+|:----------------|:-------------------|
+| **Batch Size** | 16 |
+| **Epochs** | 100 |
+| **Learning Rate** | 1e-3 |
+| **Hidden Units** | 128 |
+| **Dropout** | 0.3 |
+| **Optimizer** | Adam |
+| **Dataset** | 40,000 ICU patients · 40 variables · 7% sepsis rate |
 
 ---
 
-### 🩺 Summary
+## 📊 Performance Metrics
 
-The GRU-D model effectively captures **temporal dependencies**, **missingness patterns**, and **time-gap dynamics**,  
-making it well-suited for **ICU sepsis prediction**.  
-Its strong AUROC and AUPRC values demonstrate high discriminative performance even under **severe class imbalance** (7% sepsis rate).
+| **Metric** | **Score** | **Interpretation** |
+|:------------|:-----------:|:-------------------|
+| **AUROC (Record-level)** | **0.91** | Excellent discrimination between septic vs. non-septic time steps |
+| **AUROC (Patient-level)** | **0.82** | Strong generalization across patients |
+| **AUPRC** | **0.51** | Good precision-recall balance under class imbalance |
+| **Balanced Threshold (0.24)** | Precision = 0.53 · Recall = 0.41 | Stable sensitivity-specificity trade-off |
+| **High-Recall Mode (≥ 0.90)** | Recall = 0.88 | Detects nearly all high-risk patients for early alerts |
+
+---
+
+### 🩺 At a Glance
+**GRU-D** models **temporal decay and missingness** in ICU data, learns from irregular samples,  
+and achieves **robust sepsis prediction performance (AUROC 0.91, AUPRC 0.51)** despite severe **class imbalance (7%)**.
 
 
 
-## 🧠 GRU-D: Temporal Convolutional Networks(TCNs)
+## 🧠 TCN: Temporal Convolutional Networks
 by contract, use a series of one-dimensional causal convolution layers to ensure that each prediction at time <i>t</i> depends only on current and past inputs, preserving temporal order. These convolutions are organized in residual blocks with dilated convolutions, ReLU activations, and dropout layers to capture both short- and long-term temporal dependencies efficiently. Padding is applied to maintain consistent sequence lengths across layers. The extracted temporal features are then aggregated using global average pooling, producing a fixed-size representation for the final binary classification layer. This architecture combines the interpretability of convolutional models with strong performance on sequential medical data.
 
-## 🧠 GRU-D: Temporal Residual Transformer(TRT) 
+## 🧠 TRT: Temporal Residual Transformer 
 is designed for binary sepsis classification using variable-length time-series physiological data. The TRT uses an input projection to map features to d_model (64). It employs two transformer encoder blocks, each containing multi-head self-attention (4 heads) and a feed-forward network, stabilized by residual connections. The model handles irregular sequence lengths via padding and a key padding mask during attention, ensuring padding tokens are ignored. Sequence features are aggregated using masked average pooling before the final binary classification layer. 
 
 The data pipeline segments raw data into patient segments, labeled based on the maximum SepsisLabel. Specific features are excluded, for example EtCO2. Missing values that are labeled as NaNs are replaced with 0.0. The setup checks for PatientID overlap to prevent data leakage. Training addresses class imbalance using class weights applied to the Cross-Entropy Loss. The Adam optimizer is used, and the evaluation relies on AUROC and AUPRC.
