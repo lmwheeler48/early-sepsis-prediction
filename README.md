@@ -35,22 +35,16 @@ The `EDA_Data_Cleaning.ipynb` notebook explores the clinical time-series data to
 
 ## Dataset Preprocessing
 
-## 📘 Data Preparation Overview
-
 ### 1. Initial Cleaning (`Initial_Data_Processing.ipynb`)
 - Loaded the raw ICU dataset and standardized key columns: **patient ID**, **time**, and **Sepsis**.  
 - Converted all clinical and time variables to numeric types, handling missing or invalid entries.  
 - Sorted records chronologically by **ID** and **time** to ensure temporal consistency.  
 - Saved the cleaned dataset in `Output_dir/cleaning_pipeline/` for downstream processing.
 
----
-
 ### 2. Padding and Masking (`EDA_Data_Cleaning.ipynb`)
 - Loaded the cleaned dataset and identified all numeric clinical features.  
 - Computed the target sequence length using the **95th percentile** of patient record lengths.  
 - For each patient, truncated or padded the sequence (keeping the tail) with a padding value of **−1**, added a **Mask** column to mark valid time steps, and built fixed-length sequences for deep learning models.
-
----
 
 ### 3. Exact Stratified Splits (`EDA_Data_Cleaning.ipynb`)
 - Derived patient-level labels using the maximum **Sepsis** value per patient.  
@@ -58,13 +52,10 @@ The `EDA_Data_Cleaning.ipynb` notebook explores the clinical time-series data to
 - Ensured no patient overlap across splits.  
 - Saved patient lists and split-specific Parquet datasets in `Output_dir/padded_masked/`.
 
----
-
-✅ **Output Summary**
+**Output Summary**
 - Cleaned dataset → `Output_dir/cleaning_pipeline/all_patients_cleaned.csv`  
 - Padded + masked dataset → `Output_dir/padded_masked/sepsis_dataset_padded_masked.parquet`  
 - Split datasets → `Output_dir/padded_masked/{train,val,test}_patients.csv` and Parquet files
-
 
 ## Baseline Models
 
@@ -78,7 +69,7 @@ At this time, it is clear that this baseline model is insufficient for clinical 
 
 Three deep learning architectures were engineered and their performances compared: <b>GRU-D, TCN</b>, and <b>TRT</b>. 
 
-## 🧠 GRU-D Summary (Gated Recurrent Unit with Decay)
+### Gated Recurrent Unit with Decay (GRU-D)
 
 | **Component** | **Mathematical / Functional Description** | **Purpose in Model** |
 |:---------------|:------------------------------------------|:---------------------|
@@ -88,9 +79,7 @@ Three deep learning architectures were engineered and their performances compare
 | **Hidden Update (GRU-D)** | $$h_t = (1 - z_t) ⊙ (\gamma_h ⊙ h_{t-1}) + z_t ⊙ \tilde{h}_t$$ | Combines new information with decayed memory for temporal prediction |
 | **Loss Function** | Focal Loss (α = 0.75, γ = 2.0) | Handles class imbalance by emphasizing rare septic cases |
 
----
-
-## ⚙️ Training & Evaluation Summary
+Training & Evaluation Summary
 
 | **Parameter** | **Value / Setting** |
 |:----------------|:-------------------|
@@ -102,9 +91,7 @@ Three deep learning architectures were engineered and their performances compare
 | **Optimizer** | Adam |
 | **Dataset** | 40,000 ICU patients · 40 variables · 7% sepsis rate |
 
----
-
-## 📊 Performance Metrics
+Performance Metrics
 
 | **Metric** | **Score** | **Interpretation** |
 |:------------|:-----------:|:-------------------|
@@ -122,11 +109,11 @@ and achieves **robust sepsis prediction performance (AUROC 0.82, AUPRC 0.51)** d
 
 
 
-## 🧠 TCN: Temporal Convolutional Networks
-by contract, use a series of one-dimensional causal convolution layers to ensure that each prediction at time <i>t</i> depends only on current and past inputs, preserving temporal order. These convolutions are organized in residual blocks with dilated convolutions, ReLU activations, and dropout layers to capture both short- and long-term temporal dependencies efficiently. Padding is applied to maintain consistent sequence lengths across layers. The extracted temporal features are then aggregated using global average pooling, producing a fixed-size representation for the final binary classification layer. This architecture combines the interpretability of convolutional models with strong performance on sequential medical data.
+### Temporal Convolutional Network (TCN)
+TCNs, by contrast, use a series of one-dimensional causal convolution layers to ensure that each prediction at time <i>t</i> depends only on current and past inputs, preserving temporal order. These convolutions are organized in residual blocks with dilated convolutions, ReLU activations, and dropout layers to capture both short- and long-term temporal dependencies efficiently. Padding is applied to maintain consistent sequence lengths across layers. The extracted temporal features are then aggregated using global average pooling, producing a fixed-size representation for the final binary classification layer. This architecture combines the interpretability of convolutional models with strong performance on sequential medical data.
 
-## 🧠 TRT: Temporal Residual Transformer 
-is designed for binary sepsis classification using variable-length time-series physiological data. The TRT uses an input projection to map features to d_model (64). It employs two transformer encoder blocks, each containing multi-head self-attention (4 heads) and a feed-forward network, stabilized by residual connections. The model handles irregular sequence lengths via padding and a key padding mask during attention, ensuring padding tokens are ignored. Sequence features are aggregated using masked average pooling before the final binary classification layer. 
+### Temporal Residual Transformer (TRT)
+A TRT is designed for binary sepsis classification using variable-length time-series physiological data. The TRT uses an input projection to map features to d_model (64). It employs two transformer encoder blocks, each containing multi-head self-attention (4 heads) and a feed-forward network, stabilized by residual connections. The model handles irregular sequence lengths via padding and a key padding mask during attention, ensuring padding tokens are ignored. Sequence features are aggregated using masked average pooling before the final binary classification layer. 
 
 The data pipeline segments raw data into patient segments, labeled based on the maximum SepsisLabel. Specific features are excluded, for example EtCO2. Missing values that are labeled as NaNs are replaced with 0.0. The setup checks for PatientID overlap to prevent data leakage. Training addresses class imbalance using class weights applied to the Cross-Entropy Loss. The Adam optimizer is used, and the evaluation relies on AUROC and AUPRC.
 
