@@ -118,7 +118,7 @@ Three deep learning architectures were engineered and their performances compare
 
 ### 🩺 At a Glance
 **GRU-D** models **temporal decay and missingness** in ICU data, learns from irregular samples,  
-and achieves **robust sepsis prediction performance (AUROC 0.91, AUPRC 0.51)** despite severe **class imbalance (7%)**.
+and achieves **robust sepsis prediction performance (AUROC 0.82, AUPRC 0.51)** despite severe **class imbalance (7%)**.
 
 
 
