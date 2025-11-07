@@ -120,3 +120,16 @@ Ultimately, we selected the <b>Temporal Residual Transformer</b> (TRT) as our fi
 Future work on this project could focus on improving the model to predict not only whether a patient will develop sepsis, but also the specific hour at which onset occurs. Additionally, comparing results between hospitals A and B could help identify potential differences in outcomes; if such differences exist, examining the clinical practices at each hospital may provide valuable insights. Another area of improvement involves refining the model's weights so that it places greater emphasis on parameters most strongly correlated with sepsis. Finally, continued efforts to enhance the overall accuracy of the model will always be beneficial.
 
 ## Description of Repository
+
+**Assets/**: Contains images for the README file. 
+
+**Data/**: Contains all fully processed, split datasets. This includes both the entire dataset along with the 200 patient subset. 
+
+Contains a variety of notebooks investigating various facets of our data. These include checks for outliers, correlations, data quality, and energy flow visualizations. We also include time series-focused notebooks, including stationarity checks and ARIMA forecasting to estimate confidence levels in the post-treatment range. 
+
+
+**EDA_Data_Cleaning/**: Contains notebooks for reading in raw data, cleaning, and processing. Also includes notebooks investigating the dataset.
+
+**Models/**: Contains notebooks related to our modeling approach. Within `Baseline/`, we include the two baseline models, Logistic Regression and KNN with DTW. `Alternative_Models/` includes the two alternative deep learning models not selected, TCN and GRU-D. Finally, `Final_Model` contains our final deep learning model, the TRT architecture. 
+
+**Presentation/**: Contains the project Executive Summary and presentation PowerPoint slides.
