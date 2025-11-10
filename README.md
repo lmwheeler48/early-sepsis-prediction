@@ -68,37 +68,12 @@ Three deep learning architectures were engineered and their performances compare
 
 ### Gated Recurrent Unit with Decay (GRU-D)
 
-A GRU-D is a deep-learning model tailored for irregular time-series data with lots of missing values. It learns both temporal trends and missingness patterns, enabling detection of rare events due to class imbalance. 
-
-| **Component** | **Mathematical / Functional Description** | **Purpose in Model** |
-|:---------------|:------------------------------------------|:---------------------|
-| **Input Decay (γₓ)** | $$\gamma_x = e^{-\max(0, W_x \Delta_t + b_x)}$$ | Learns how quickly each input feature's influence fades over time gaps |
-| **Hidden Decay (γₕ)** | $$\gamma_h = e^{-\max(0, W_h \Delta_t + b_h)}$$ | Controls how much past hidden states are retained or forgotten |
-| **Imputation Rule** | $$x_t' = m_t ⊙ x_t + (1 - m_t) ⊙ (\gamma_x ⊙ x_{t-1}' + (1 - \gamma_x) ⊙ \bar{x})$$ | Fills missing data using past values and feature means |
-| **Hidden Update (GRU-D)** | $$h_t = (1 - z_t) ⊙ (\gamma_h ⊙ h_{t-1}) + z_t ⊙ \tilde{h}_t$$ | Combines new information with decayed memory for temporal prediction |
-| **Loss Function** | Focal Loss (α = 0.75, γ = 2.0) | Handles class imbalance by emphasizing rare septic cases |
-
-Training & Evaluation Summary
-
-| **Parameter** | **Value / Setting** |
-|:----------------|:-------------------|
-| **Batch Size** | 16 |
-| **Epochs** | 100 |
-| **Learning Rate** | 1e-3 |
-| **Hidden Units** | 128 |
-| **Dropout** | 0.3 |
-| **Optimizer** | Adam |
-| **Dataset** | 40,000 ICU patients · 40 variables · 7% sepsis rate |
-
-Performance Metrics
-
-| **Metric** | **Score** | **Interpretation** |
-|:------------|:-----------:|:-------------------|
-| **AUROC (Record-level)** | **0.91** | Excellent discrimination between septic vs. non-septic time steps |
-| **AUROC (Patient-level)** | **0.82** | Strong generalization across patients |
-| **AUPRC** | **0.51** | Good precision-recall balance under class imbalance |
-| **Balanced Threshold (0.24)** | Precision = 0.53 · Recall = 0.41 | Stable sensitivity-specificity trade-off |
-| **High-Recall Mode (≥ 0.90)** | Recall = 0.88 | Detects nearly all high-risk patients for early alerts |
+GRU-D is a recurrent neural network designed for **irregularly sampled and missing clinical time-series data**.  
+It introduces **input and hidden-state decay mechanisms** that model how information fades over time gaps between observations.  
+The model was trained using **Focal Loss** to handle severe **class imbalance** (7% sepsis rate), with the following hyperparameters:  
+**batch size = 16**, **epochs = 100**, **learning rate = 1e-3**, **hidden units = 128**, and **dropout = 0.3**.  
+GRU-D achieved an **AUROC of 0.91**, **patient-level AUROC of 0.82**, and **AUPRC of 0.51**, demonstrating strong discrimination and generalization.  
+At a balanced threshold (**precision = 0.53**, **recall = 0.41**) it maintained a stable trade-off, and under high-recall mode (**recall = 0.88**) it effectively detected nearly all high-risk sepsis cases.
 
 ### Temporal Convolutional Network (TCN)
 TCNs, by contrast, use a series of one-dimensional causal convolution layers to ensure that each prediction at time <i>t</i> depends only on current and past inputs, preserving temporal order. These convolutions are organized in residual blocks with dilated convolutions, ReLU activations, and dropout layers to capture both short- and long-term temporal dependencies efficiently. Padding is applied to maintain consistent sequence lengths across layers. The extracted temporal features are then aggregated using global average pooling, producing a fixed-size representation for the final binary classification layer. This architecture combines the interpretability of convolutional models with strong performance on sequential medical data.
