@@ -1,6 +1,6 @@
 # Early Sepsis Prediction
 
-Team members: [Yang Mo](https://github.com/zetacaveman), [Sayantan Sarkar](https://github.com/Sayantan128), [Cristopher Thompson](), [Alexandria Wheeler](https://github.com/lmwheeler48)
+Team members: [Yang Mo](https://github.com/zetacaveman), [Sayantan Sarkar](https://github.com/Sayantan128), [Cristopher Thompson](https://github.com/cthomps9), [Alexandria Wheeler](https://github.com/lmwheeler48)
 
 # Table of Contents
 1. [Introduction](#introduction)
